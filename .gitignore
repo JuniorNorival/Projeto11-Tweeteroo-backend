@@ -9,6 +9,8 @@
 /coverage
 /assets
 /css
+.index.html
+.script.js
 # production
 /build
 
