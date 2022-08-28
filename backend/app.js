@@ -9,6 +9,10 @@ const users = [];
 const tweet = [];
 const tweets = [];
 app.post("/sign-up", (req, res) => {
+  if (users.find((user) => user.username === req.body.username)) {
+    res.sendStatus(409);
+    return;
+  }
   users.push(req.body);
   res.send("OK");
 });
@@ -16,18 +20,27 @@ app.post("/sign-up", (req, res) => {
 app.post("/tweets", (req, res) => {
   tweet.push(req.body);
   const userTweet = users.find((user) => user.username === req.body.username);
-  console.log(userTweet);
+
   tweets.push({
     ...tweets,
     avatar: userTweet.avatar,
     username: req.body.username,
     tweet: req.body.tweet,
   });
-  res.send("OK");
+  res.sendStatus(200);
 });
-app.get("/tweets", (req, res) => {
-  const avatar = users.find((user) => user.username === tweet.username);
+function get10Tweets() {
+  const lastTweets = [];
+  for (let i = tweets.length - 1; i >= 0; i--) {
+    lastTweets.push(tweets[i]);
+    if (lastTweets.length === 10) {
+      break;
+    }
+  }
+  return lastTweets;
+}
 
-  res.send(tweets);
+app.get("/tweets", (req, res) => {
+  res.send(get10Tweets());
 });
 app.listen(5000);
