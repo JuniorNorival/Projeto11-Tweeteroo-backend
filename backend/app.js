@@ -6,29 +6,40 @@ app.use(cors());
 app.use(express.json());
 
 const users = [];
-const tweet = [];
 const tweets = [];
+
 app.post("/sign-up", (req, res) => {
-  if (users.find((user) => user.username === req.body.username)) {
+  const { username, avatar } = req.body;
+  if (!username || !avatar) {
+    res.status(400).send("Todos os campos são obrigatórios!");
+    return;
+  }
+  if (users.find((user) => user.username === username)) {
     res.sendStatus(409);
     return;
   }
-  users.push(req.body);
-  res.send("OK");
+
+  users.push({ username: username, avatar: avatar });
+
+  res.status(201).send("OK");
 });
 
 app.post("/tweets", (req, res) => {
-  tweet.push(req.body);
-  const userTweet = users.find((user) => user.username === req.body.username);
+  const { username, tweet } = req.body;
+  const userTweet = users.find((user) => user.username === username);
+  if (!username || !tweet) {
+    res.status(400).send("Todos os campos são obrigatórios!");
+    return;
+  }
 
   tweets.push({
-    ...tweets,
     avatar: userTweet.avatar,
-    username: req.body.username,
-    tweet: req.body.tweet,
+    username: username,
+    tweet: tweet,
   });
-  res.sendStatus(200);
+  res.status(201).send("OK");
 });
+
 function get10Tweets() {
   const lastTweets = [];
   for (let i = tweets.length - 1; i >= 0; i--) {
@@ -41,6 +52,8 @@ function get10Tweets() {
 }
 
 app.get("/tweets", (req, res) => {
-  res.send(get10Tweets());
+  const last10Tweets = get10Tweets();
+  res.send(last10Tweets);
 });
+
 app.listen(5000);
